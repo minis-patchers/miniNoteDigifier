@@ -100,7 +100,7 @@ registerPatcher({
             }
         }],
         finalize: function(patchFile, helpers, settings, locals) {
-            helpers.logMessage("Patched "+locals.number + " books")
+            helpers.logMessage("Digified "+locals.number + " books")
         }
     })
 });

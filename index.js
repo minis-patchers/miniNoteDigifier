@@ -27,16 +27,13 @@ registerPatcher({
                 if(xelib.LongName(form).contains("VNotes")) {
                     locals.noteMSG = helpers.copyToPatch(form)
                     xelib.RemoveElement(locals.noteMSG, "FormIDs")
-                    helpers.logMessage("Found VNOTE");
                     
                 } else if(xelib.LongName(form).contains("MiscNotes")) {
                     locals.miscNotes = helpers.copyToPatch(form)
                     xelib.RemoveElement(locals.miscNotes, "FormIDs")
-                    helpers.logMessage("Found MISCNOTE");
                 } else {
                     locals.noteBools = helpers.copyToPatch(form)
                     xelib.RemoveElement(locals.noteBools, "FormIDs")
-                    helpers.logMessage("Found Bools");
                 }
             })
             if(settings.UseRCU) {
@@ -70,7 +67,6 @@ registerPatcher({
                 }
             },
             patch: function(record, helpers, settings, locals) {
-                helpers.logMessage("PTCH: "+xelib.LongName(record))
                 if(!xelib.GetValue(record, "DESC").contains("<Alias=")) {
                     let mesg = xelib.AddElement(patch, "MESG\\MESG")
                     xelib.AddElement(mesg, "FULL")

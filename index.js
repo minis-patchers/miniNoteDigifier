@@ -21,40 +21,16 @@ registerPatcher({
         initialize: function(patch, helpers, settings, locals) {
             let filen = xelib.FileByName("PBT_RoN.esp")
             locals.number = 0
-            let forms = xelib.GetRecords(filen, "FLST")
-            forms.forEach(form => {
-                helpers.logMessage(xelib.LongName(form))
-                if(xelib.LongName(form).contains("VNotes")) {
-                    locals.noteMSG = helpers.copyToPatch(form)
-                    xelib.RemoveElement(locals.noteMSG, "FormIDs")
-                    
-                } else if(xelib.LongName(form).contains("MiscNotes")) {
-                    locals.miscNotes = helpers.copyToPatch(form)
-                    xelib.RemoveElement(locals.miscNotes, "FormIDs")
-                } else {
-                    locals.noteBools = helpers.copyToPatch(form)
-                    xelib.RemoveElement(locals.noteBools, "FormIDs")
-                }
-            })
+            locals.noteMSG = helpers.copyToPatch(xelib.GetElement(filen, "FLST\\SSWB_VNotes"))
+            xelib.RemoveElement(locals.noteMSG, "FormIDs")
+            locals.miscNotes = helpers.copyToPatch(xelib.GetElement(filen, "FLST\\SSWB_MiscNotes"))
+            xelib.RemoveElement(locals.miscNotes, "FormIDs")
+            locals.noteBools = helpers.copyToPatch(xelib.GetElement(filen, "FLST\\SSWB_GlobalValues"))
+            xelib.RemoveElement(locals.noteBools, "FormIDs")
             if(settings.UseRCU) {
-                xelib.GetRecords(filen, "BOOK").forEach(form => {
-                    if(xelib.GetValue(form, "EDID") == "SSWB_ExampleNote") {
-                        xelib.AddFormID(locals.miscNotes, xelib.GetHexFormID(form))
-                        return;
-                    }
-                })
-                xelib.GetRecords(filen, "GLOB").forEach(form => {
-                    if(xelib.GetValue(form, "EDID") == "PlayerHasNote00") {
-                        xelib.AddFormID(locals.noteBools, xelib.GetHexFormID(form))
-                        return;
-                    }
-                })
-                xelib.GetRecords(filen, "MESG").forEach(form => {
-                    if(xelib.GetValue(form, "EDID") == "SSWB_Note02") {
-                        xelib.AddFormID(locals.noteMSG, xelib.GetHexFormID(form))
-                        return;
-                    }
-                })
+                xelib.AddFormID(locals.noteBools, xelib.GetHexFormID(xelib.GetElement(filen, "GLOB\\PlayerHasNote00")))
+                xelib.AddFormID(locals.miscNotes, xelib.GetHexFormID(xelib.GetElement(filen, "BOOK\\SSWB_ExampleNote")))
+                xelib.AddFormID(locals.noteMSG, xelib.GetHexFormID(xelib.GetElement(filen, "MESG\\SSWB_Note02")))
             }
         },
         // required: array of process blocks. each process block should have both
@@ -73,11 +49,7 @@ registerPatcher({
                     xelib.AddElement(mesg, "EDID")
                     helpers.cacheRecord(mesg, "DIGI_"+locals.number)
                     let inf = xelib.GetValue(record, "DESC")
-                    inf = inf.replace(/<font face='.*>/, "")
-                    inf = inf.replace(/<font face='.* size='\d+'>/, "")
-                    inf = inf.replace(/<p align='.*'>/, "")
-                    inf = inf.replace(/<font size='\d+'>/, "")
-                    inf = inf.replace("</font>" ,"")
+                    inf = inf.replace(/<.*\/?>/, "")
                     xelib.SetValue(mesg, "DESC", inf)
                     if(xelib.HasElement(record, "FULL")) {
                         xelib.SetValue(mesg, "FULL", xelib.GetValue(record, "FULL"))
